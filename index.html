@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Leave a Note</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,9 +30,17 @@
             --silver-2: #c9d0e4;
             --silver-3: #969fbe;
             --silver-ink: #1b2340;
+
+            /* fluid sizing tokens, recalculated per breakpoint below */
+            --card-w: min(420px, 92vw);
+            --card-h: min(560px, 88svh);
+            --moon-size: 120px;
         }
 
-        html { color-scheme: dark; }
+        html {
+            color-scheme: dark;
+            height: 100%;
+        }
 
         body {
             background:
@@ -44,10 +52,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            min-height: 100svh;
+            min-height: 100dvh;
             padding: 20px;
-            overflow: hidden;
+            padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
             position: relative;
+            /* allow scrolling instead of clipping content when a screen is too short/narrow */
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
         /* faint horizon haze, the kind of low glow real night skies pick up */
@@ -74,21 +86,33 @@
         /* real moon, hung in the sky behind everything, shaped to tonight's actual phase */
         .moon-wrap {
             position: fixed;
-            top: 8vh;
-            right: 10vw;
-            width: 120px;
-            height: 120px;
+            top: max(4vh, 24px);
+            right: max(6vw, 20px);
+            width: var(--moon-size);
+            height: var(--moon-size);
             pointer-events: none;
             z-index: 1;
             opacity: 0;
             filter: drop-shadow(0 0 22px rgba(233, 224, 190, 0.35)) drop-shadow(0 0 60px rgba(233, 224, 190, 0.16));
             animation: moon-fade-in 1.4s ease 0.2s forwards, moon-glow 7s ease-in-out 1.6s infinite;
+            transition: width 0.3s ease, height 0.3s ease;
         }
 
         .moon-wrap svg { width: 100%; height: 100%; display: block; }
 
-        .moon-wrap .moon-lit {
-            transition: d 0.6s ease;
+        .moon-caption {
+            position: fixed;
+            top: calc(max(4vh, 24px) + var(--moon-size) + 8px);
+            right: max(6vw, 20px);
+            width: var(--moon-size);
+            text-align: center;
+            font-size: 10px;
+            letter-spacing: 0.04em;
+            color: var(--muted);
+            opacity: 0;
+            z-index: 1;
+            pointer-events: none;
+            animation: moon-fade-in 1.4s ease 0.6s forwards;
         }
 
         @keyframes moon-fade-in {
@@ -98,21 +122,6 @@
         @keyframes moon-glow {
             0%, 100% { opacity: 0.78; }
             50% { opacity: 0.95; }
-        }
-
-        .moon-caption {
-            position: fixed;
-            top: calc(8vh + 128px);
-            right: 10vw;
-            width: 120px;
-            text-align: center;
-            font-size: 10px;
-            letter-spacing: 0.04em;
-            color: var(--muted);
-            opacity: 0;
-            z-index: 1;
-            pointer-events: none;
-            animation: moon-fade-in 1.4s ease 0.6s forwards;
         }
 
         /* floating sparkles, drifting gently and blinking like stars, all over the page */
@@ -195,9 +204,11 @@
             background: var(--card);
             border: 1px solid var(--line);
             border-radius: 22px;
-            width: 100%;
+            width: var(--card-w);
             max-width: 420px;
-            height: 560px;
+            height: var(--card-h);
+            max-height: 640px;
+            min-height: 380px;
             display: flex;
             flex-direction: column;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 46px rgba(150, 160, 190, 0.1);
@@ -242,10 +253,11 @@
         }
 
         .chat-header {
-            padding: 28px 24px 18px;
+            padding: clamp(16px, 4svh, 28px) 24px clamp(10px, 2svh, 18px);
             text-align: center;
             border-bottom: 1px solid var(--line);
             position: relative;
+            flex-shrink: 0;
         }
 
         .mark {
@@ -310,7 +322,7 @@
         .chat-header h1 {
             font-family: 'Fraunces', serif;
             font-weight: 500;
-            font-size: 22px;
+            font-size: clamp(18px, 4vw, 22px);
             letter-spacing: 0.01em;
             color: var(--ink);
             margin-bottom: 6px;
@@ -325,12 +337,13 @@
 
         .chat-body {
             flex: 1;
-            padding: 22px;
+            padding: clamp(12px, 3svh, 22px);
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
             gap: 12px;
-            overflow: hidden;
+            overflow-y: auto;
+            min-height: 0;
         }
 
         .message-prompt {
@@ -416,12 +429,13 @@
         }
 
         .chat-input-area {
-            padding: 16px 18px 20px;
+            padding: 14px 18px max(14px, env(safe-area-inset-bottom)) 18px;
             border-top: 1px solid var(--line);
             display: flex;
             gap: 10px;
             background: var(--card);
             align-items: center;
+            flex-shrink: 0;
         }
 
         .field-wrap {
@@ -429,6 +443,7 @@
             position: relative;
             display: flex;
             align-items: center;
+            min-width: 0;
         }
 
         .field-icon {
@@ -449,7 +464,7 @@
             padding: 13px 20px 13px 42px;
             color: var(--ink);
             font-family: inherit;
-            font-size: 14px;
+            font-size: 16px; /* 16px avoids iOS Safari auto-zoom on focus */
             outline: none;
             transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
         }
@@ -550,6 +565,50 @@
             100% { opacity: 0; transform: scale(1.8); }
         }
 
+        /* --- Responsive breakpoints --- */
+
+        /* Narrow phones in portrait */
+        @media (max-width: 380px) {
+            :root {
+                --card-w: 94vw;
+                --moon-size: 84px;
+            }
+            .chat-header h1 { font-size: 18px; }
+            .chat-header p { font-size: 11.5px; }
+        }
+
+        /* Short viewports: landscape phones, or any window where height is the constraint.
+           Shrinks the decorative header/moon and lets the card fit without clipping. */
+        @media (max-height: 520px) {
+            :root {
+                --card-h: min(520px, 94svh);
+                --moon-size: 64px;
+            }
+            body { padding: 10px; align-items: center; }
+            .chat-header { padding: 10px 20px 8px; }
+            .mark { width: 28px; height: 28px; margin-bottom: 4px; }
+            .chat-header h1 { font-size: 16px; margin-bottom: 2px; }
+            .chat-header p { display: none; }
+            .chat-body { padding: 10px 16px; gap: 8px; }
+            .message-prompt, .status-message { padding: 10px 14px; font-size: 13px; }
+            .chat-input-area { padding: 10px 16px max(10px, env(safe-area-inset-bottom)); }
+            .moon-caption { display: none; }
+        }
+
+        /* Very short viewports (landscape on small phones): drop the moon entirely
+           so it never overlaps or overflows the card, and let the page scroll if needed. */
+        @media (max-height: 400px) {
+            .moon-wrap, .moon-caption { display: none; }
+            :root { --card-h: min(480px, 96svh); }
+            .chat-container { margin: auto; }
+        }
+
+        /* Landscape phones specifically: keep the card from stretching too wide/short */
+        @media (orientation: landscape) and (max-width: 900px) {
+            :root { --card-w: min(420px, 78vw); }
+            body { overflow-y: auto; }
+        }
+
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 0.001ms !important;
@@ -578,7 +637,7 @@
                 </radialGradient>
             </defs>
             <circle cx="50" cy="50" r="49" fill="url(#moonBase)"/>
-            <path class="moon-lit" id="moon-lit-path" fill="url(#moonLit)"></path>
+            <path id="moon-lit-path" fill="url(#moonLit)"></path>
         </svg>
     </div>
     <div class="moon-caption" id="moon-caption"></div>
@@ -631,8 +690,17 @@
 
         const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        // Real-time moon phase, computed from the visitor's own clock
-        (function renderMoonPhase() {
+        // Real-time moon phase, computed from the visitor's own clock.
+        //
+        // phase runs 0 -> 1, where 0 and 1 are New Moon and 0.5 is Full Moon.
+        // The lit silhouette is built by sampling points around the right-hand
+        // half of the disc (always present) and a terminator curve whose
+        // horizontal offset is k = cos(2*PI*phase) times the radius. This
+        // guarantees the *area* of the lit region always equals the correct
+        // illuminated fraction (1 - cos(2*PI*phase)) / 2 for every phase —
+        // 0% at new moon, 50% at the quarters, 100% at full — instead of
+        // relying on hand-picked SVG arc sweep flags that can silently invert.
+        function renderMoonPhase() {
             const SYNODIC_MONTH = 29.530588853; // days
             // a known new moon reference point (Jan 6, 2000, 18:14 UTC)
             const KNOWN_NEW_MOON = Date.UTC(2000, 0, 6, 18, 14, 0);
@@ -641,35 +709,40 @@
             let phase = (daysSince % SYNODIC_MONTH) / SYNODIC_MONTH;
             if (phase < 0) phase += 1; // 0 = new moon, 0.5 = full moon, back to 1 = new moon
 
-            const size = 100, r = size / 2;
-            const angle = phase * 2 * Math.PI;
-            const rx = Math.abs(r * Math.cos(angle));
-            const top = `${r},0`;
-            const bottom = `${r},${size}`;
+            const size = 100, cx = 50, cy = 50, r = 49;
+            const k = Math.cos(2 * Math.PI * phase);
 
-            let d;
-            if (phase <= 0.25) {
-                d = `M${top} A${r},${r} 0 0 1 ${bottom} A${rx},${r} 0 0 1 ${top} Z`;
-            } else if (phase <= 0.5) {
-                d = `M${top} A${r},${r} 0 0 1 ${bottom} A${rx},${r} 0 0 0 ${top} Z`;
-            } else if (phase <= 0.75) {
-                d = `M${top} A${r},${r} 0 0 0 ${bottom} A${rx},${r} 0 0 1 ${top} Z`;
-            } else {
-                d = `M${top} A${r},${r} 0 0 0 ${bottom} A${rx},${r} 0 0 0 ${top} Z`;
+            const N = 48; // sample points per side; plenty smooth at this size
+            const pts = [];
+
+            // Right-hand outer boundary, top -> bottom (always the full right edge)
+            for (let i = 0; i <= N; i++) {
+                const a = -Math.PI / 2 + Math.PI * (i / N);
+                pts.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]);
             }
+            // Terminator curve, bottom -> top, offset by k (can bulge either side)
+            for (let i = 0; i <= N; i++) {
+                const a = Math.PI / 2 - Math.PI * (i / N);
+                pts.push([cx + k * r * Math.cos(a), cy + r * Math.sin(a)]);
+            }
+
+            const d = 'M' + pts.map(p => `${p[0].toFixed(2)},${p[1].toFixed(2)}`).join(' L') + ' Z';
 
             const path = document.getElementById('moon-lit-path');
             if (path) path.setAttribute('d', d);
 
             const names = ['New Moon', 'Waxing Crescent', 'First Quarter', 'Waxing Gibbous', 'Full Moon', 'Waning Gibbous', 'Last Quarter', 'Waning Crescent'];
             const name = names[Math.floor(phase * 8 + 0.5) % 8];
-            const illumination = Math.round((1 - Math.cos(angle)) / 2 * 100);
+            const illumination = Math.round((1 - k) / 2 * 100);
 
             const wrap = document.getElementById('moon-wrap');
             const caption = document.getElementById('moon-caption');
             if (wrap) wrap.title = `${name} · ${illumination}% illuminated`;
             if (caption) caption.textContent = name;
-        })();
+        }
+        renderMoonPhase();
+        // Recheck periodically so a long-open tab still stays roughly current
+        setInterval(renderMoonPhase, 30 * 60 * 1000);
 
         // Typewriter intro for the prompt bubble
         (function typeIntro() {
@@ -692,9 +765,10 @@
             setTimeout(step, 550);
         })();
 
-        // Ambient sparkles, scattered across the whole page, blinking like stars with a slow drift
+        // Ambient sparkles, scattered across the whole page, blinking like stars with a slow drift.
+        // Fewer on small screens so the page stays light and doesn't force extra scroll height.
         (function spawnSparkles() {
-            const count = 90;
+            const count = window.innerWidth < 480 ? 45 : 90;
             const frag = document.createDocumentFragment();
             for (let i = 0; i < count; i++) {
                 const wrap = document.createElement('div');
@@ -741,9 +815,11 @@
             schedule();
         })();
 
-        // Subtle parallax tilt on the card, following the cursor
+        // Subtle parallax tilt on the card, following the cursor (desktop pointer only —
+        // skipped on touch devices so it doesn't fight with scrolling/tapping)
         (function cardTilt() {
             if (reduceMotion) return;
+            if (window.matchMedia('(pointer: coarse)').matches) return;
             const card = document.getElementById('chat-container');
             let raf = null;
 
